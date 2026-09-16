@@ -1,6 +1,6 @@
 # release_check.ps1 - refuse a release whose version numbers disagree.
 #
-#   tools\release_check.ps1 -Version 1.5.0
+#   tools\release_check.ps1 -Version 1.0.0
 #
 # Checked (all must say the same version):
 #   - the tag / requested version is X.Y.Z with parts 0..99 (the updater's build

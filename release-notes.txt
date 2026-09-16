@@ -1,4 +1,4 @@
-GameBaiters TTS v1.5.0
+GameBaiters TTS v1.0.0
 ======================
 
 The first public release, published from github.com/gamebaiters/ts3tts. The

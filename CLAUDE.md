@@ -1,7 +1,7 @@
 # TTS TS3 — GameBaiters TTS (Claude reference)
 
 TeamSpeak 3 plugin: type in a box, press Enter, a **local** neural voice speaks in the channel. Built on SOUNDBOARD_4.0's architecture and crash rules; its DSP chain + effects editor are compiled **in place** from `../SOUNDBOARD_4.0/upstream-clone/src` (never copied).
-C++17 / Qt 5.15.2 plugin + Python 3.12 backend: Qwen3-TTS (GPU, faster-qwen3-tts CUDA graphs), Kokoro-82M (light CPU, kokoro-onnx fp32), Supertonic 3 (CPU). Current: **v1.5.0** (engine installation window with progress + private Python via uv, auto-update, GitHub release pipeline; read own channel chat, queued messages, real-time AI voice changer) — see `vault/history/v1.5.0.md`, `vault/build-release/engine-installer.md`, `vault/build-release/release-and-update.md`.
+C++17 / Qt 5.15.2 plugin + Python 3.12 backend: Qwen3-TTS (GPU, faster-qwen3-tts CUDA graphs), Kokoro-82M (light CPU, kokoro-onnx fp32), Supertonic 3 (CPU). Current: **v1.0.0**, the first public release (internal development line v1.0-v1.5, history in `vault/history/`; engine installation window with progress + private Python via uv, auto-update, GitHub release pipeline; read own channel chat, queued messages, real-time AI voice changer) — see `vault/history/v1.5.0.md`, `vault/build-release/engine-installer.md`, `vault/build-release/release-and-update.md`.
 Repository: `github.com/gamebaiters/ts3tts` (Windows only). Releases = push a `vX.Y.Z` tag (README "Releasing").
 
 **Session start:** read this file, then `vault/HOME.md`. Grep the vault before reading source.

@@ -4,7 +4,7 @@
 # release pipeline (.github/workflows/release.yml), so what CI publishes is exactly
 # what is tested locally.
 #
-#   tools\package_plugin.ps1 -Dll build\release\gb_tts_win64.dll -Version 1.5.0 -OutFile dist\gb_tts_1.5.0_win64.ts3_plugin
+#   tools\package_plugin.ps1 -Dll build\release\gb_tts_win64.dll -Version 1.0.0 -OutFile dist\gb_tts_1.0.0_win64.ts3_plugin
 #
 # Package layout (TeamSpeak extracts everything under plugins\ into its plugin folder):
 #   package.ini

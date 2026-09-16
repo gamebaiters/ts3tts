@@ -7,5 +7,5 @@ while the model is still generating. Nothing is ever written to disk except the
 small voice prompts the user explicitly creates.
 """
 
-__version__ = "1.5.0"
+__version__ = "1.0.0"
 PROTOCOL_VERSION = 1

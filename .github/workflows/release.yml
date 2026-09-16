@@ -5,8 +5,8 @@ name: Release (Windows)
 # Push a vX.Y.Z tag -> build the plugin on a Windows runner, run the self-tests,
 # package gb_tts_X.Y.Z_win64.ts3_plugin, generate version.xml (the auto-updater
 # feed) and publish the GitHub release:
-#   git tag v1.5.0
-#   git push origin v1.5.0
+#   git tag v1.0.0
+#   git push origin v1.0.0
 # Before tagging: bump plugin/CMakeLists.txt GBTTS_VERSION, backend/gbtts/__init__.py
 # __version__ and add the release-notes.txt section. tools/release_check.ps1 refuses
 # the release when they disagree with the tag.

@@ -100,6 +100,9 @@ if ($Install) {
     Copy-Item -Force $dll $plugins
     $destAssets = Join-Path $plugins "gb_tts"
     New-Item -ItemType Directory -Force -Path $destAssets | Out-Null
+    # The packaged engine code is replaced, not merged: no module of an older version survives.
+    $destBackend = Join-Path $destAssets "backend"
+    if (Test-Path $destBackend) { Remove-Item -Recurse -Force $destBackend }
     Copy-Item -Recurse -Force "$assets\*" $destAssets
     Write-Host "[build] installed into $plugins" -ForegroundColor Green
 }
