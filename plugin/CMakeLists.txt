@@ -115,7 +115,8 @@ set(SHARED_DSP
 set(SHARED_UI
     ${SB_SRC}/style_helper.cpp
     ${SB_SRC}/ExpandableSection.cpp
-    ${SB_SRC}/ExpandableSection.ui
+    # ExpandableSection.ui is NOT listed: no source includes ui_ExpandableSection.h, and with
+    # the Ninja generator (CI) the explicit .ui produced "multiple rules generate ui_*.h".
     ${SB_SRC}/SpeechBubble.cpp
     ${SB_SRC}/modules/theme.cpp
     ${SB_SRC}/modules/icon_factory.cpp
