@@ -41,7 +41,11 @@ env:
 jobs:
 
   build-windows:
-    runs-on: windows-latest
+    # Pinned to VS 2022 (MSVC 14.4x), the toolset of the locally tested builds. windows-latest
+    # moved to VS 2026 (MSVC 14.51): its STL removed stdext::make_checked_array_iterator, which
+    # the Qt 5.15.2 headers still use, and a newer toolset could need a newer msvcp140.dll than
+    # the one loaded in the TeamSpeak client.
+    runs-on: windows-2022
     timeout-minutes: 60
     outputs:
       version: ${{ steps.ver.outputs.version }}
