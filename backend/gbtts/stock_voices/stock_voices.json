@@ -1,0 +1,165 @@
+{
+  "version": 1,
+  "voices": [
+    {
+      "slug": "giulia",
+      "name": "Giulia",
+      "gender": "female",
+      "lang": "it",
+      "description": "Giovane donna sui venticinque anni, calda e cordiale",
+      "ref_text": "Ciao a tutti, sono Giulia. Parlo in modo tranquillo e naturale, come se fossimo in chiamata insieme a giocare. Fatemi sapere se mi sentite bene.",
+      "instruct": "Voce femminile italiana, giovane adulta sui venticinque anni, timbro caldo e luminoso, tono cordiale e rilassato, dizione chiara, accento italiano standard senza inflessioni dialettali, ritmo naturale da conversazione.",
+      "design_seed": 0,
+      "measured": {
+        "clone_cer": 0.0,
+        "ref_cer": 0.0,
+        "f0_hz": 247.4,
+        "seconds": 9.42
+      }
+    },
+    {
+      "slug": "marco",
+      "name": "Marco",
+      "gender": "male",
+      "lang": "it",
+      "description": "Uomo sui trent'anni, amichevole e sicuro",
+      "ref_text": "Ciao ragazzi, sono Marco. Parlo con calma e in modo naturale, come in una chiamata tra amici. Ditemi pure se l'audio arriva bene.",
+      "instruct": "Voce maschile italiana, uomo sui trent'anni, timbro medio-grave e pieno, tono amichevole e sicuro, dizione chiara, accento italiano standard senza inflessioni dialettali, ritmo naturale da conversazione.",
+      "design_seed": 0,
+      "measured": {
+        "clone_cer": 0.0,
+        "ref_cer": 0.0,
+        "f0_hz": 189.0,
+        "seconds": 9.2
+      }
+    },
+    {
+      "slug": "sofia",
+      "name": "Sofia",
+      "gender": "female",
+      "lang": "it",
+      "description": "Ragazza sui vent'anni, vivace ed entusiasta",
+      "ref_text": "Ehi, ciao a tutti! Sono Sofia. Stasera si gioca fino a tardi, quindi preparatevi, perché questa volta vinciamo noi, ve lo prometto.",
+      "instruct": "Voce femminile italiana di una ragazza di vent'anni, timbro chiaro e squillante, tono vivace ed entusiasta, parla con energia e col sorriso, dizione chiara, accento italiano standard senza inflessioni dialettali.",
+      "design_seed": 20260916,
+      "measured": {
+        "clone_cer": 0.012,
+        "ref_cer": 0.0,
+        "f0_hz": 342.9,
+        "seconds": 9.43
+      }
+    },
+    {
+      "slug": "elena",
+      "name": "Elena",
+      "gender": "female",
+      "lang": "it",
+      "description": "Donna sui quarant'anni, calda e calma, da narratrice",
+      "ref_text": "Buonasera, sono Elena. Mi piace raccontare le cose con calma, una parola alla volta, lasciando il tempo di ascoltare ogni dettaglio.",
+      "instruct": "Voce femminile italiana di una donna sui quarant'anni, timbro caldo, morbido e profondo, tono calmo e rassicurante, ritmo lento e posato come una narratrice di audiolibri, dizione impeccabile, accento italiano standard senza inflessioni dialettali.",
+      "design_seed": 20261016,
+      "measured": {
+        "clone_cer": 0.0,
+        "ref_cer": 0.0,
+        "f0_hz": 210.5,
+        "seconds": 9.36
+      }
+    },
+    {
+      "slug": "chiara",
+      "name": "Chiara",
+      "gender": "female",
+      "lang": "it",
+      "description": "Giornalista sui trent'anni, limpida e professionale",
+      "ref_text": "Buongiorno, sono Chiara. Ecco le ultime notizie: la partita di stasera inizierà alle nove, con tutte le squadre già pronte a scendere in campo.",
+      "instruct": "Voce femminile italiana di una giornalista sui trent'anni, timbro limpido e professionale, tono sicuro e neutro da conduttrice del telegiornale, articolazione precisa, ritmo sostenuto, accento italiano standard senza inflessioni dialettali.",
+      "design_seed": 20261116,
+      "measured": {
+        "clone_cer": 0.0,
+        "ref_cer": 0.029,
+        "f0_hz": 220.2,
+        "seconds": 11.89
+      }
+    },
+    {
+      "slug": "rosa",
+      "name": "Rosa",
+      "gender": "female",
+      "lang": "it",
+      "description": "Signora anziana, dolce e affettuosa",
+      "ref_text": "Ciao tesoro, sono Rosa. Siediti un momento, che ti preparo qualcosa di caldo, e intanto mi racconti com'è andata la giornata.",
+      "instruct": "Voce femminile italiana di una signora anziana sui settant'anni, timbro dolce e leggermente velato, tono affettuoso e gentile come una nonna, ritmo tranquillo, accento italiano standard senza inflessioni dialettali.",
+      "design_seed": 20261217,
+      "measured": {
+        "clone_cer": 0.0,
+        "ref_cer": 0.0,
+        "f0_hz": 195.1,
+        "seconds": 11.77
+      }
+    },
+    {
+      "slug": "luca",
+      "name": "Luca",
+      "gender": "male",
+      "lang": "it",
+      "description": "Giovane uomo sui venticinque anni, allegro e spigliato",
+      "ref_text": "Raga, sono Luca! Avete visto quella giocata? Pazzesca! Dai, facciamone subito un'altra, che sono carichissimo.",
+      "instruct": "Voce maschile italiana di un giovane uomo sui venticinque anni, timbro baritonale caldo e maschile, voce grave, tono allegro, disinvolto e spigliato, ritmo naturale, accento italiano standard senza inflessioni dialettali.",
+      "design_seed": 20261317,
+      "measured": {
+        "clone_cer": 0.0,
+        "ref_cer": 0.0,
+        "f0_hz": 146.9,
+        "seconds": 9.82
+      }
+    },
+    {
+      "slug": "alessandro",
+      "name": "Alessandro",
+      "gender": "male",
+      "lang": "it",
+      "description": "Uomo sui quarantacinque anni, grave e autorevole, da speaker radio",
+      "ref_text": "Buonasera, sono Alessandro. Benvenuti a questa serata speciale: mettetevi comodi, perché il meglio deve ancora arrivare.",
+      "instruct": "Voce maschile italiana di un uomo sui quarantacinque anni, timbro molto grave, profondo e vellutato, tono autorevole e sicuro da speaker radiofonico, dizione perfetta, ritmo misurato, accento italiano standard senza inflessioni dialettali.",
+      "design_seed": 20261418,
+      "measured": {
+        "clone_cer": 0.0,
+        "ref_cer": 0.0,
+        "f0_hz": 140.4,
+        "seconds": 7.86
+      }
+    },
+    {
+      "slug": "giorgio",
+      "name": "Giorgio",
+      "gender": "male",
+      "lang": "it",
+      "description": "Signore anziano, bonario e paziente",
+      "ref_text": "Ciao ragazzo, sono Giorgio. Ai miei tempi si giocava all'aperto, ma devo ammettere che anche questi giochi hanno il loro fascino.",
+      "instruct": "Voce maschile italiana di un signore anziano sui settant'anni, timbro caldo e un po' roco, tono bonario, saggio e paziente come un nonno, ritmo lento, accento italiano standard senza inflessioni dialettali.",
+      "design_seed": 20261517,
+      "measured": {
+        "clone_cer": 0.0,
+        "ref_cer": 0.0,
+        "f0_hz": 144.6,
+        "seconds": 9.14
+      }
+    },
+    {
+      "slug": "davide",
+      "name": "Davide",
+      "gender": "male",
+      "lang": "it",
+      "description": "Uomo sui trentacinque anni, cordiale e rilassato",
+      "ref_text": "Ciao a tutti, sono Davide. Tranquilli, nessuna fretta: facciamo le cose per bene e ci divertiamo, come sempre.",
+      "instruct": "Voce maschile italiana di un uomo sui trentacinque anni, timbro tenorile chiaro e luminoso, tono cordiale, positivo e rilassato, ritmo naturale da conversazione, accento italiano standard senza inflessioni dialettali.",
+      "design_seed": 20261616,
+      "measured": {
+        "clone_cer": 0.0,
+        "ref_cer": 0.0,
+        "f0_hz": 128.3,
+        "seconds": 7.71
+      }
+    }
+  ]
+}

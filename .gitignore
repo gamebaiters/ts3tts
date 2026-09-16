@@ -1,0 +1,27 @@
+# ---- build output ----------------------------------------------------------
+/build/
+/build-*/
+/dist/
+/out/
+
+# ---- developer engine install (backend/ doubles as a dev "home") -------------
+# Python environment, downloaded models (~19 GB), the user's own voices
+# (recordings!) and logs never go into the repository.
+/backend/.venv/
+/backend/venv/
+/backend/models/
+/backend/voices/
+/backend/logs/
+/backend/app/
+__pycache__/
+*.py[cod]
+
+# ---- tools / editors -----------------------------------------------------------
+.vs/
+.vscode/
+.idea/
+*.user
+CMakeUserPresets.json
+/vault/.obsidian/
+.DS_Store
+Thumbs.db

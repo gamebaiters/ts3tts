@@ -1,0 +1,82 @@
+GameBaiters TTS v1.5.0
+======================
+
+The first public release, published from github.com/gamebaiters/ts3tts. The
+voice engine now installs itself from a window with a progress bar (nothing to
+prepare, not even Python), new versions arrive by themselves, and the "read
+my channel chat aloud" switch is where it is used.
+
+Voice engine installation
+-------------------------
+
+* NEW - A window installs the voice engine with one click and a progress
+  bar: every step, how much is downloaded and how fast. It opens by itself
+  when the engine is missing. Python is no longer needed beforehand: a
+  private Python 3.12 is downloaded into the engine folder, nothing else on
+  the PC is changed.
+* NEW - Two choices: Complete (Qwen3-TTS on an NVIDIA graphics card, plus
+  Kokoro, about 8 GB) or Light (Kokoro on the processor, about 1 GB). The
+  graphics card and the free disk space are checked before starting.
+* NEW - The installation runs in the background: close the window or even
+  TeamSpeak, it continues, and the TTS window shows the percentage. Cancel,
+  Retry (resumes where it stopped) and the full log are one click away.
+* NEW - When it finishes the engine starts by itself.
+* FIX - After reinstalling Windows the old engine looked installed but could
+  not start ("No Python at ..."). It is now recognised as broken and the
+  window offers to repair it, keeping the downloaded models.
+* CHANGE - Installation is several times faster (uv instead of pip): the
+  light engine installs in about two minutes.
+
+Italian voices
+--------------
+
+* NEW - Eight new Italian voices for Qwen3-TTS, next to Giulia and Marco:
+  Sofia, Elena, Chiara and Rosa, Luca, Alessandro, Giorgio and Davide -
+  young and old, bright and deep, calm narrator, news anchor, radio
+  speaker. They are original synthetic voices (no real person's voice is
+  used), each one checked for clear Italian speech before being included.
+  They appear in their own group, "Italian voices (included)", and can also
+  be used by the live voice changer.
+* CHANGE - The Italian voices ship ready-made: the first start no longer
+  spends minutes creating Giulia and Marco, and the voice design model
+  (4 GB) is downloaded only the first time you create a voice.
+
+Updates
+-------
+
+* NEW - Automatic updates, like the GameBaiters Soundboard. A few seconds
+  after TeamSpeak starts (at most once a day) the plugin checks for a new
+  version and asks before doing anything, showing what changed. "Update
+  now" downloads the package, verifies its SHA-256 checksum, closes
+  TeamSpeak cleanly and starts the TeamSpeak plugin installer. "Later" asks
+  again in three days.
+* NEW - Plugins > GameBaiters - TTS > Check for TTS updates..., and in
+  Settings > Interface: "Check for updates now" plus a switch to turn the
+  automatic check off.
+* NEW - The voice engine is updated together with the plugin: at its next
+  start the plugin installs the new engine code into the engine folder. If
+  an update needs different Python libraries it says so and points to
+  "Install / repair the engine".
+
+Interface
+---------
+
+* CHANGE - "Read aloud what I write in the channel chat" moved out of
+  Settings, right under the text box of the TTS window.
+* FIX - In Settings > Text, "Also write the message in the channel chat" is
+  now aligned with the other options.
+
+Included from the previous development versions
+-----------------------------------------------
+
+* Read my own channel chat messages aloud (private and server chat, and
+  other people's messages, are never read).
+* Messages typed while the voice engine is still starting are queued and
+  spoken as soon as it is ready; the chat echo is sent immediately.
+* Live voice (AI): a real-time voice changer for the microphone (MeanVC2 on
+  the CPU, about 0.3 s of delay).
+* Three engines chosen in Settings: Qwen3-TTS (NVIDIA GPU), Kokoro and
+  Supertonic (CPU); every setting is saved immediately; the engine closes
+  with TeamSpeak and frees its memory even after a crash.
+
+Windows only (TeamSpeak 3 64-bit).

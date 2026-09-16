@@ -1,0 +1,248 @@
+name: Release (Windows)
+
+# GameBaiters TTS supports Windows only (TeamSpeak 3 win64 client).
+#
+# Push a vX.Y.Z tag -> build the plugin on a Windows runner, run the self-tests,
+# package gb_tts_X.Y.Z_win64.ts3_plugin, generate version.xml (the auto-updater
+# feed) and publish the GitHub release:
+#   git tag v1.5.0
+#   git push origin v1.5.0
+# Before tagging: bump plugin/CMakeLists.txt GBTTS_VERSION, backend/gbtts/__init__.py
+# __version__ and add the release-notes.txt section. tools/release_check.ps1 refuses
+# the release when they disagree with the tag.
+#
+# workflow_dispatch builds + tests + packages a snapshot (downloadable artifact),
+# it never publishes.
+#
+# The updater feed is a RELEASE ASSET, read through releases/latest/download/.
+# The release is created as a draft with every asset and only then published, so
+# clients can never see a version.xml whose package is not downloadable yet.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  QT_VERSION: '5.15.2'
+  # The DSP chain + effects editor are the GameBaiters Soundboard sources, compiled
+  # in place (never copied). Pinned: bump deliberately after testing locally.
+  SOUNDBOARD_REPO: gamebaiters/RP-Soundboard
+  SOUNDBOARD_REF: e03eb95bc049b66757ca240b004f4564cd2ebf6b
+
+jobs:
+
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+      release: ${{ steps.ver.outputs.release }}
+    steps:
+      - name: Checkout GameBaiters TTS
+        uses: actions/checkout@v4
+        with:
+          path: ts3tts
+
+      - name: Checkout GameBaiters Soundboard sources (pinned)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.SOUNDBOARD_REPO }}
+          ref: ${{ env.SOUNDBOARD_REF }}
+          path: SOUNDBOARD_4.0/upstream-clone
+
+      - name: Resolve version
+        id: ver
+        shell: pwsh
+        working-directory: ts3tts
+        run: |
+          $cmake = (Select-String -Path plugin/CMakeLists.txt -Pattern 'set\(GBTTS_VERSION "([^"]+)"\)').Matches[0].Groups[1].Value
+          if ($env:GITHUB_REF -like 'refs/tags/v*') {
+            $version = $env:GITHUB_REF_NAME.Substring(1)
+            $release = 'true'
+          } else {
+            $version = "$cmake-snapshot.$($env:GITHUB_SHA.Substring(0, 7))"
+            $release = 'false'
+          }
+          # Tag builds must agree with every version in the tree; snapshots are
+          # checked against CMake so a broken tree is noticed before tagging.
+          ./tools/release_check.ps1 -Version ($release -eq 'true' ? $version : $cmake)
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "release=$release" >> $env:GITHUB_OUTPUT
+          "Building GameBaiters TTS $version (release: $release)"
+
+      - name: Install Qt ${{ env.QT_VERSION }} (msvc2019_64, same Qt as the TeamSpeak client)
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: windows
+          target: desktop
+          arch: win64_msvc2019_64
+          cache: true
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Configure
+        shell: pwsh
+        run: |
+          $generator = if (Get-Command ninja -ErrorAction SilentlyContinue) { 'Ninja' } else { 'NMake Makefiles' }
+          "CMake generator: $generator"
+          cmake -S ts3tts/plugin -B build -G $generator `
+                -DCMAKE_BUILD_TYPE=Release `
+                -DGBTTS_BUILD_TESTS=ON `
+                -DSOUNDBOARD_ROOT="$($env:GITHUB_WORKSPACE)/SOUNDBOARD_4.0"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      - name: Build
+        shell: pwsh
+        run: |
+          cmake --build build --config Release --parallel
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          $dll = Get-Item build/release/gb_tts_win64.dll
+          "gb_tts_win64.dll: {0:N1} MB" -f ($dll.Length / 1MB)
+
+      - name: Self-tests (settings, auto-updater)
+        shell: pwsh
+        run: |
+          $env:PATH = "$env:QT_ROOT_DIR\bin;$env:PATH"
+          ./build/tests/gbtts_settings_selftest.exe
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          ./build/tests/gbtts_update_selftest.exe
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      - name: Setup Python (backend checks)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Backend checks (byte-compile, voice changer streaming policy, Italian stock voices)
+        shell: pwsh
+        run: |
+          python -m pip install --disable-pip-version-check --quiet numpy==2.5.3 soundfile==0.14.0 soxr==1.1.0
+          python -m compileall -q ts3tts/backend/gbtts ts3tts/backend/tools
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          python ts3tts/backend/tests/test_vc_session.py
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          python ts3tts/backend/tests/test_stock_voices.py
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $v = '${{ steps.ver.outputs.version }}'
+          New-Item -ItemType Directory -Force -Path out | Out-Null
+          $pkg = ./ts3tts/tools/package_plugin.ps1 -Dll build/release/gb_tts_win64.dll -Version $v `
+                   -StageDir build/stage -OutFile "out/gb_tts_${v}_win64.ts3_plugin"
+          if (-not $?) { exit 1 }
+          Get-ChildItem build/stage -Recurse -File | ForEach-Object { "{0,10}  {1}" -f $_.Length, $_.FullName.Substring((Resolve-Path build/stage).Path.Length + 1) }
+
+      - name: Generate update feed (version.xml) and checksums
+        shell: pwsh
+        run: |
+          $v = '${{ steps.ver.outputs.version }}'
+          $name = "gb_tts_${v}_win64.ts3_plugin"
+          $sha = (Get-FileHash "out/$name" -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$sha  $name" | Set-Content out/SHA256SUMS.txt -Encoding ascii
+          Copy-Item ts3tts/release-notes.txt out/release-notes.txt
+          $base = "https://github.com/${{ github.repository }}/releases/download/v$v"
+          $build = 0
+          if ($v -match '^(\d+)\.(\d+)\.(\d+)$') { $build = [int]$Matches[1] * 10000 + [int]$Matches[2] * 100 + [int]$Matches[3] }
+          $xml = @"
+          <?xml version="1.0" encoding="utf-8"?>
+          <versionDescription>
+            <product descVersion="1" name="gb_tts">
+              <latestVersion>$build</latestVersion>
+              <latestVersionString>$v</latestVersionString>
+              <latestDownload>
+                <url>$base/$name</url>
+              </latestDownload>
+              <featureUrl>$base/release-notes.txt</featureUrl>
+              <sha256>$sha</sha256>
+            </product>
+          </versionDescription>
+          "@
+          [IO.File]::WriteAllText("$PWD/out/version.xml", ($xml -replace '(?m)^          ', ''), (New-Object Text.UTF8Encoding $false))
+          Get-Content out/version.xml
+          if ('${{ steps.ver.outputs.release }}' -eq 'true') {
+            # Validated by the very parser the plugin uses.
+            $env:PATH = "$env:QT_ROOT_DIR\bin;$env:PATH"
+            ./build/tests/gbtts_update_selftest.exe --validate-feed out/version.xml --expect-version $v
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+          }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gb_tts-${{ steps.ver.outputs.version }}-win64
+          path: out/
+          if-no-files-found: error
+
+  release:
+    needs: build-windows
+    if: needs.build-windows.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.build-windows.outputs.version }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: gb_tts-${{ needs.build-windows.outputs.version }}-win64
+          path: out
+
+      - name: Release notes of this version only
+        run: |
+          awk -v ver="$VERSION" '
+            /^GameBaiters TTS v/ { if (found) exit; if ($0 == "GameBaiters TTS v" ver) found = 1 }
+            found { print }
+          ' release-notes.txt | tr -d '\r' > notes.md
+          test -s notes.md || { echo "no release-notes.txt section for v$VERSION"; exit 1; }
+          cat notes.md
+
+      - name: Create the release as a draft with every asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.VERSION }}
+          name: GameBaiters TTS v${{ env.VERSION }}
+          body_path: notes.md
+          draft: true
+          files: |
+            out/gb_tts_${{ env.VERSION }}_win64.ts3_plugin
+            out/SHA256SUMS.txt
+            out/release-notes.txt
+            out/version.xml
+          fail_on_unmatched_files: true
+
+      - name: Publish (the feed goes live together with its package)
+        run: gh release edit "v$VERSION" --repo "$GITHUB_REPOSITORY" --draft=false --latest
+
+      - name: Verify what clients will download
+        run: |
+          set -euo pipefail
+          sleep 5
+          feed="https://github.com/$GITHUB_REPOSITORY/releases/latest/download/version.xml"
+          curl -fsSL --retry 5 --retry-delay 5 "$feed" -o feed.xml
+          cat feed.xml
+          grep -q "<latestVersionString>$VERSION</latestVersionString>" feed.xml
+          url=$(sed -n 's:.*<url>\(.*\)</url>.*:\1:p' feed.xml)
+          curl -fsSL --retry 5 --retry-delay 5 "$url" -o package.ts3_plugin
+          expected=$(sed -n 's:.*<sha256>\(.*\)</sha256>.*:\1:p' feed.xml)
+          actual=$(sha256sum package.ts3_plugin | cut -d' ' -f1)
+          test "$expected" = "$actual"
+          echo "feed + package OK ($actual)"

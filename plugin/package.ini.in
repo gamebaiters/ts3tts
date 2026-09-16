@@ -1,0 +1,8 @@
+Name = GameBaiters - TTS
+Type = Plugin
+Author = GameBaiters (gamebaiters.net)
+Version = @version@
+Platforms = win64
+Description = Talk in your TeamSpeak channel without a microphone: type a message, press Enter and a local neural voice speaks for you, with natural Italian intonation. Qwen3-TTS on your NVIDIA GPU, or Kokoro and Supertonic on the CPU; nothing leaves your PC and no audio files are stored. Voice design and cloning, a real-time AI voice changer for your microphone, channel chat read aloud, the full GameBaiters Soundboard effects chain, hotkeys, /tts chat command and automatic updates.
+
+The voice engine (Python + models) is installed separately from the plugin settings: TTS settings > Engine installation > Install / repair the engine.

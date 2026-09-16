@@ -1,0 +1,26 @@
+# GameBaiters TTS backend - exact, tested versions (Windows, Python 3.12, NVIDIA CUDA 12.8 wheels).
+#
+# torch / torchaudio come from the PyTorch index (see install_backend.ps1):
+#   pip install torch==2.11.0 torchaudio==2.11.0 --index-url https://download.pytorch.org/whl/cu128
+#
+# transformers is pinned to 5.15.1 on purpose: 5.17.0 moved Mimi's RoPE settings out of
+# `rope_theta`, and qwen-tts-hf 0.1.1.post1 then fails every model load with
+# "'MimiConfig' object has no attribute 'rope_theta'".
+faster-qwen3-tts==0.4.0
+qwen-tts-hf==0.1.1.post1
+transformers==5.15.1
+accelerate==1.12.0
+supertonic==1.3.1
+kokoro-onnx==0.6.1
+espeakng-loader==0.2.4
+phonemizer==3.4.0
+onnxruntime==1.30.0
+soxr==1.1.0
+# real-time voice changer (gbtts/vc, MeanVC2 vendored): explicit, not only via qwen-tts-hf
+einops==0.8.2
+safetensors==0.8.0
+soundfile==0.14.0
+num2words==0.5.14
+numpy==2.5.3
+truststore==0.10.4
+huggingface-hub==1.31.0
