@@ -1,3 +1,39 @@
+GameBaiters TTS v1.1.0
+======================================================================
+
+Off by default, an unmistakable power button, effects that no longer hang
+around after you stop talking, and proper coexistence with the GameBaiters
+Soundboard plugin when both are installed.
+
+Engine
+------
+
+* FIX - The voice engine used to start itself automatically the moment
+  TeamSpeak loaded the plugin. It is now off by default and only starts
+  when you explicitly turn it on.
+* NEW - A dedicated power button next to the status text: grey when off,
+  green when on, amber while starting up or if something is wrong. Click
+  it to turn the engine on or off directly, instead of only having an
+  "Install…" / "Start" text button that disappeared once running.
+* FIX - Effects (reverb, delay, chorus and the like) could hold the
+  microphone/transmission open for up to 3 seconds after a phrase ended,
+  even when the effect enabled had no actual tail at all (a plain EQ or
+  compressor, say). Only effects that can genuinely still be producing
+  sound after the text stops now keep the connection open; everything
+  else releases immediately, same as with no effects at all.
+
+GameBaiters Soundboard integration
+-----------------------------------
+
+* NEW - If the GameBaiters Soundboard plugin is also installed, this
+  plugin now coordinates with it instead of fighting over the
+  microphone: the Soundboard becomes the single point that writes the
+  outgoing audio, and this plugin's speech (with its own effects
+  already applied) is mixed in as the very last step, right before it
+  reaches TeamSpeak. Previously, whichever plugin's turn came second
+  could silently wipe out whatever the other one had just written -
+  playing a sound could cut off the TTS mid-sentence, or vice versa.
+
 GameBaiters TTS v1.0.0
 ======================
 

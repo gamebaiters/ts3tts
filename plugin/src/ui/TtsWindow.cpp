@@ -101,6 +101,46 @@ void StatusDot::paintEvent(QPaintEvent *)
 }
 
 // ===========================================================================
+EnginePowerButton::EnginePowerButton(QWidget *parent) : QToolButton(parent)
+{
+    setFixedSize(30, 30);
+    setCursor(Qt::PointingHandCursor);
+    setAutoRaise(true);
+}
+
+void EnginePowerButton::setMode(Mode m)
+{
+    if (m == m_mode) return;
+    m_mode = m;
+    update();
+}
+
+void EnginePowerButton::paintEvent(QPaintEvent *)
+{
+    QPainter p(this);
+    p.setRenderHint(QPainter::Antialiasing);
+    const QColor c = (m_mode == Mode::On) ? kGreen
+                    : (m_mode == Mode::Intermediate) ? kAmber : kGrey;
+
+    QColor halo = c;
+    halo.setAlpha(45);
+    p.setPen(Qt::NoPen);
+    p.setBrush(halo);
+    p.drawEllipse(rect().adjusted(1, 1, -1, -1));
+
+    const QRectF glyph = QRectF(rect()).adjusted(7, 7, -7, -7);
+    QPen pen(c, 2.4);
+    pen.setCapStyle(Qt::RoundCap);
+    p.setPen(pen);
+    p.setBrush(Qt::NoBrush);
+    // Standard power symbol: a ~270 deg arc (gap centered at 12 o'clock)
+    // plus a vertical tick crossing into that gap. 1/16-degree units.
+    p.drawArc(glyph, 135 * 16, 270 * 16);
+    p.drawLine(QPointF(glyph.center().x(), glyph.top() - 1.0),
+               QPointF(glyph.center().x(), glyph.center().y()));
+}
+
+// ===========================================================================
 TtsWindow::TtsWindow(Controller *ctrl, QWidget *parent) : QWidget(parent), m_ctrl(ctrl)
 {
     setWindowTitle(tr("GameBaiters - TTS"));
@@ -169,6 +209,32 @@ void TtsWindow::buildUi()
     auto *statusRow = new QHBoxLayout();
     statusRow->setSpacing(8);
     m_dot = new StatusDot(this);
+    m_power = new EnginePowerButton(this);
+    m_power->setToolTip(tr("Turn the voice engine on or off"));
+    connect(m_power, &QToolButton::clicked, this, [this] {
+        using B = Controller::Backend;
+        const B st = m_ctrl->state();
+        switch (st) {
+        case B::NotInstalled:
+        case B::Installing:
+            openEngineSetup();
+            break;
+        case B::Stopped:
+        case B::Error:
+            m_ctrl->startBackend();
+            break;
+        case B::Ready:
+        case B::Busy:
+            m_ctrl->stopBackend();
+            break;
+        case B::Starting:
+        case B::Loading:
+            // Mid start-up: treat the click as "cancel" rather than doing
+            // nothing - stopBackend() is safe to call in any state.
+            m_ctrl->stopBackend();
+            break;
+        }
+    });
     m_status = new QLabel(this);
     m_status->setTextInteractionFlags(Qt::TextSelectableByMouse);
     QFont bold = m_status->font();
@@ -200,6 +266,7 @@ void TtsWindow::buildUi()
     statusText->addWidget(m_status);
     statusText->addWidget(m_detail);
     statusRow->addWidget(m_dot, 0, Qt::AlignVCenter);
+    statusRow->addWidget(m_power, 0, Qt::AlignVCenter);
     statusRow->addLayout(statusText, 1);
     statusRow->addWidget(m_action);
     statusRow->addWidget(m_btnVoices);
@@ -561,6 +628,28 @@ void TtsWindow::refreshState()
     const QString msg = m_ctrl->stateMessage();
     m_status->setText(msg.isEmpty() || st == B::Ready ? title : QStringLiteral("%1 — %2").arg(title, msg));
     m_dot->setToolTip(msg);
+
+    // Power button: three unambiguous buckets regardless of the finer
+    // status text above - off (not installed / stopped), on (ready /
+    // working), or "in between" (starting up, or a problem, per the
+    // user-facing design: those two read the same at this granularity).
+    switch (st) {
+    case B::NotInstalled:
+    case B::Stopped:
+        m_power->setMode(EnginePowerButton::Mode::Off);
+        break;
+    case B::Ready:
+    case B::Busy:
+        m_power->setMode(EnginePowerButton::Mode::On);
+        break;
+    case B::Installing:
+    case B::Starting:
+    case B::Loading:
+    case B::Error:
+        m_power->setMode(EnginePowerButton::Mode::Intermediate);
+        break;
+    }
+    m_power->setToolTip(title + (msg.isEmpty() ? QString() : QStringLiteral("\n%1").arg(msg)));
 
     const QJsonObject info = m_ctrl->backendInfo();
     QStringList parts;

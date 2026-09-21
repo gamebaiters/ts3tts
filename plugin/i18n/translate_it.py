@@ -134,6 +134,7 @@ IT = {
         "Segui la finestra di PowerShell. Quando dice che ha finito, premi “Avvia / riavvia”.",
     # ---- TtsWindow ----
     "GameBaiters - TTS": "GameBaiters - TTS",
+    "Turn the voice engine on or off": "Accendi o spegni il motore vocale",
     "Voices": "Voci",
     "Create, clone and manage voices": "Crea, clona e gestisci le voci",
     "Settings": "Impostazioni",

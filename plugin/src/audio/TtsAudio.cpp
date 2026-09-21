@@ -57,6 +57,7 @@ TtsAudio::TtsAudio()
     m_pbStereo.resize(kMaxCallbackFrames * 2);
     m_pbFlags.resize(kMaxCallbackFrames);
     m_fbFlags.resize(kMaxCallbackFrames);
+    m_bridgePub.resize(kMaxCallbackFrames * 2);
     m_vcScratch.resize(kMaxCallbackFrames);
     m_player = std::make_unique<LocalPlayer>(this);
 }
@@ -390,7 +391,25 @@ bool TtsAudio::pumpOnce()
     int peak = 0;
     for (int i = 0; i < kBlock * 2; ++i) peak = std::max(peak, std::abs(static_cast<int>(blk.pcm[i])));
 
-    const bool chainRings = m_dsp.isActive() || pitchOn;
+    // m_dsp.isActive() just means "the sandbox is on", true for e.g. a
+    // lone EQ/Compressor with no tail at all - that used to arm the
+    // FULL kMaxTailBlocks (3 s) hold for ANY enabled stage, so the mic/
+    // transmission stayed open for up to 3 s after every single phrase
+    // whenever any effect was on, not only genuine tail effects. Only
+    // stages that can actually still be producing sound from silent
+    // input (reverb/delay tails, resonant modulation feedback, VoiceFx's
+    // own pitch/formant grain windowing) now arm the ring-out; anything
+    // else cuts immediately with the phrase, same as no DSP at all.
+    const SandboxState &ds = m_dsp.state();
+    const bool hasTailStage = m_dsp.isActive() && (
+        ds.reverbWet > 0.001f ||
+        (ds.delayEnabled   && ds.delayMix   > 0.001f) ||
+        (ds.chorusEnabled  && ds.chorusMix  > 0.001f) ||
+        (ds.flangerEnabled && ds.flangerMix > 0.001f) ||
+        (ds.flangusEnabled && ds.flangusMix > 0.001f) ||
+        (ds.phaserEnabled  && ds.phaserMix  > 0.001f) ||
+        ds.vfxEnabled);
+    const bool chainRings = hasTailStage || pitchOn;
     if (hitEnd) {
         m_inUtterance = false;
         m_ramp = 0.0f;
@@ -640,22 +659,47 @@ bool TtsAudio::onCapture(uint64_t sch, short *samples, int frames, int channels,
     // mic from popping in between sentences.
     const bool ttsRecently = now - m_lastRemoteMs.load(std::memory_order_relaxed) < 600;
     const int micMode = m_micMode.load(std::memory_order_relaxed);
-    if (m_forceMicSilence.load(std::memory_order_relaxed) ||
-        (!preview && ttsRecently && micMode == MicReplace)) {
-        std::fill_n(samples, static_cast<size_t>(frames) * channels, static_cast<short>(0));
-        edited = true;
-    } else if (!preview && ttsRecently && micMode == MicDuck) {
-        for (int i = 0; i < frames * channels; ++i) samples[i] = static_cast<short>(samples[i] / 4);
-        edited = true;
+    const GbBridge::MicPolicy wantMicPolicy =
+        (m_forceMicSilence.load(std::memory_order_relaxed) || (!preview && ttsRecently && micMode == MicReplace))
+            ? GbBridge::MicPolicy::Silence
+        : (!preview && ttsRecently && micMode == MicDuck)
+            ? GbBridge::MicPolicy::Duck
+            : GbBridge::MicPolicy::None;
+
+    // The Soundboard plugin, if also installed and loaded, is the single
+    // writer of the shared TS3 capture buffer (see ipc/GbAudioBridge.h) -
+    // two independent plugins each blindly zeroing/overwriting the SAME
+    // host buffer is exactly the "soundboard playback overwrites the TTS
+    // and vice versa" bug the bridge exists to fix. Falls straight back
+    // to writing `samples` directly (unchanged original behaviour) the
+    // instant the Soundboard is not present or its heartbeat goes stale.
+    GbBridge::Shared *bridge = m_bridge.get();
+    const bool soundboardPresent = bridge && bridge->soundboardFresh();
+
+    if (!soundboardPresent) {
+        if (wantMicPolicy == GbBridge::MicPolicy::Silence) {
+            std::fill_n(samples, static_cast<size_t>(frames) * channels, static_cast<short>(0));
+            edited = true;
+        } else if (wantMicPolicy == GbBridge::MicPolicy::Duck) {
+            for (int i = 0; i < frames * channels; ++i) samples[i] = static_cast<short>(samples[i] / 4);
+            edited = true;
+        }
     }
 
     float peak = m_peak.load(std::memory_order_relaxed) * 0.85f;
+    bool anyAudible = false;
     if (got > 0) {
         const float rg = m_remoteGain.load(std::memory_order_relaxed);
         for (int i = 0; i < got; ++i) {
             const int l = stereo[i * 2], r = stereo[i * 2 + 1];
             peak = std::max(peak, std::max(std::abs(l), std::abs(r)) / 32768.0f);
             if (!transmit || (flags[i] & kFlagLocal)) continue;
+            anyAudible = true;
+            if (soundboardPresent) {
+                m_bridgePub[i * 2]     = clampS(static_cast<int>(l * rg));
+                m_bridgePub[i * 2 + 1] = clampS(static_cast<int>(r * rg));
+                continue;
+            }
             if (channels == 1) {
                 samples[i] = clampS(samples[i] + static_cast<int>(((l + r) * 0.5f) * rg));
             } else {
@@ -663,7 +707,7 @@ bool TtsAudio::onCapture(uint64_t sch, short *samples, int frames, int channels,
                 samples[i * channels + 1] = clampS(samples[i * channels + 1] + static_cast<int>(r * rg));
             }
         }
-        if (transmit) edited = true;
+        if (!soundboardPresent && transmit) edited = true;
 
         // Local monitor: preview frames always, channel frames when enabled.
         const bool monitor = m_monitor.load(std::memory_order_relaxed);
@@ -676,6 +720,16 @@ bool TtsAudio::onCapture(uint64_t sch, short *samples, int frames, int channels,
             }
             m_monitorRing.write(mon, static_cast<size_t>(got) * 2);
         }
+    }
+    if (soundboardPresent) {
+        // Published every tick (not just while got > 0) so the mic
+        // policy stays correctly applied through the whole 600 ms
+        // "ttsRecently" trailing window, not just while new blocks are
+        // actually being produced - otherwise the Soundboard's read
+        // would go stale ~250 ms into that window and the mic would
+        // pop back early even though TTS still wants it held.
+        if (!anyAudible) std::fill_n(m_bridgePub.data(), static_cast<size_t>(n) * 2, static_cast<int16_t>(0));
+        bridge->publishTts(n, 2, wantMicPolicy, anyAudible, m_bridgePub.data());
     }
     m_peak.store(peak, std::memory_order_relaxed);
     return edited;

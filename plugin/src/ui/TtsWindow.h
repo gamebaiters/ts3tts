@@ -3,6 +3,7 @@
 #include <QColor>
 #include <QPointer>
 #include <QTimer>
+#include <QToolButton>
 #include <QWidget>
 
 class QCheckBox;
@@ -11,7 +12,6 @@ class QLabel;
 class QLineEdit;
 class QListWidget;
 class QPushButton;
-class QToolButton;
 class ChannelMeter;
 class ChannelSandboxDialog;
 class FineSlider;
@@ -35,6 +35,27 @@ protected:
 
 private:
     QColor m_color{0x8A, 0x8F, 0x98};
+};
+
+// Engine power toggle, next to the status text: exactly three
+// unambiguous states (off / on / "something in between" - starting up
+// or a problem), painted glyph so it never depends on an icon theme
+// (no Qt5::Svg on this host). A simplified summary the detailed status
+// text above already breaks down further.
+class EnginePowerButton : public QToolButton
+{
+    Q_OBJECT
+public:
+    enum class Mode { Off, On, Intermediate };
+    explicit EnginePowerButton(QWidget *parent = nullptr);
+    void setMode(Mode m);
+    QSize sizeHint() const override { return {30, 30}; }
+
+protected:
+    void paintEvent(QPaintEvent *) override;
+
+private:
+    Mode m_mode = Mode::Off;
 };
 
 class TtsWindow : public QWidget
@@ -76,6 +97,7 @@ private:
     bool        m_syncing = false;
 
     StatusDot   *m_dot = nullptr;
+    EnginePowerButton *m_power = nullptr;
     QLabel      *m_status = nullptr;
     QLabel      *m_detail = nullptr;
     QPushButton *m_action = nullptr;

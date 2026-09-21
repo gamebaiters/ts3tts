@@ -20,7 +20,10 @@ struct Settings
 {
     // ---- engine / backend ----
     QString backendHome;
-    bool    autostart       = true;
+    // Off by default: the engine only starts when the user explicitly
+    // turns it on (toolbar power button / "Start" action / Settings
+    // checkbox), never silently on every TeamSpeak launch.
+    bool    autostart       = false;
     QString engine          = QStringLiteral("qwen");   // qwen | kokoro | supertonic
     QString qwenSize        = QStringLiteral("1.7B");   // 1.7B | 0.6B
     QString kokoroVariant   = QStringLiteral("fp32");   // fp32 (fast on CPU) | int8 (smaller, ~7x slower)

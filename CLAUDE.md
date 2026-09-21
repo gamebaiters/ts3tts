@@ -1,7 +1,7 @@
 # TTS TS3 — GameBaiters TTS (Claude reference)
 
 TeamSpeak 3 plugin: type in a box, press Enter, a **local** neural voice speaks in the channel. Built on SOUNDBOARD_4.0's architecture and crash rules; its DSP chain + effects editor are compiled **in place** from `../SOUNDBOARD_4.0/upstream-clone/src` (never copied).
-C++17 / Qt 5.15.2 plugin + Python 3.12 backend: Qwen3-TTS (GPU, faster-qwen3-tts CUDA graphs), Kokoro-82M (light CPU, kokoro-onnx fp32), Supertonic 3 (CPU). Current: **v1.0.0**, the first public release (internal development line v1.0-v1.5, history in `vault/history/`; engine installation window with progress + private Python via uv, auto-update, GitHub release pipeline; read own channel chat, queued messages, real-time AI voice changer) — see `vault/history/v1.5.0.md`, `vault/build-release/engine-installer.md`, `vault/build-release/release-and-update.md`.
+C++17 / Qt 5.15.2 plugin + Python 3.12 backend: Qwen3-TTS (GPU, faster-qwen3-tts CUDA graphs), Kokoro-82M (light CPU, kokoro-onnx fp32), Supertonic 3 (CPU). Current: **v1.1.0** (engine off by default + power on/off button, DSP-tail ring-out no longer overholds for non-tail effects, cross-plugin shared-memory audio bridge with the GameBaiters Soundboard — see `vault/history/v1.1.0.md`, `vault/architecture/audio-bridge.md`). Prior: v1.0.0 first public release (internal development line v1.0-v1.5, history in `vault/history/`; engine installation window with progress + private Python via uv, auto-update, GitHub release pipeline; read own channel chat, queued messages, real-time AI voice changer) — see `vault/history/v1.5.0.md`, `vault/build-release/engine-installer.md`, `vault/build-release/release-and-update.md`.
 Repository: `github.com/gamebaiters/ts3tts` (Windows only). Releases = push a `vX.Y.Z` tag (README "Releasing").
 
 **Session start:** read this file, then `vault/HOME.md`. Grep the vault before reading source.
@@ -59,6 +59,8 @@ Details: `vault/build-release/build-and-install.md`.
 - **Update feed = release asset** `releases/latest/download/version.xml` (draft → publish): build number must equal `versionNumber(latestVersionString)` or the plugin rejects it (update loop). Bump version in CMake + `backend/gbtts/__init__.py` + release-notes (`tools/release_check.ps1`). [release-and-update]
 - **Load Qwen from the local snapshot directory**, not the repo id (repo id ⇒ ~20 HTTP requests per start). [engines-and-models]
 - UI language default is **Italian**; stored v1.0 `auto` is migrated to `it` (`Settings::load`).
+- **`autostart` defaults to `false`** (v1.1.0): the engine never starts itself on plugin load unless the user turns it on (power button next to the status text, or the Settings checkbox). Existing users who already had `autostart=true` saved keep that choice — only fresh installs are affected.
+- **If the GameBaiters Soundboard plugin is also installed**, this plugin stops writing the shared TS3 capture buffer itself and instead publishes to `ipc/GbAudioBridge.h` — the Soundboard becomes the single writer. [audio-bridge]
 - Audio callbacks read `g_audio` atomically; shutdown nulls it + 50 ms pumped drain before delete. [audio-core]
 - Talk-state override is the Soundboard's TalkStateManager port — keep every guard. [ts3-integration]
 - SDK constants (`SPEAKER_*`, `CLIENT_INPUT_*`) need `common.h`.

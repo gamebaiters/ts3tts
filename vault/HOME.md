@@ -14,6 +14,7 @@ Obsidian-style vault. Open this folder in Obsidian: the graph view is the mind m
 ## TeamSpeak integration
 - [[ts3-integration]] — SDK exports, callbacks, hotkeys, `/tts`, talk-state override, muted-mic handling
 - [[crash-safety]] — rules inherited from SOUNDBOARD ghost-crash forensics and how each is applied here
+- [[audio-bridge]] — cross-plugin shared-memory bridge with the GameBaiters Soundboard (capture-buffer coexistence)
 
 ## UI
 - [[ui-map]] — TtsWindow, VoiceDialog, SettingsDialog, toolbar overlay, reused Soundboard widgets
@@ -25,6 +26,7 @@ Obsidian-style vault. Open this folder in Obsidian: the graph view is the mind m
 - [[testing]] — bench (TTFA/RTF/VRAM + Whisper CER), backend e2e, audio-core + settings selftests, host lifecycle/leak/crash harness
 
 ## History
+- [[v1.1.0]] — ⭐ latest: engine off by default, power on/off button, DSP-tail ring-out no longer overholds for non-tail effects, cross-plugin audio bridge with the GameBaiters Soundboard.
 - [[v1.0.0]] — first release: decisions, rejected alternatives, bugs found while building
 - [[v1.1.0]] — Kokoro light engine, Italian default
 - [[v1.2.0]] — engine chosen in Settings, per-engine voices, save on every change, singleShot-after-unload crash found and fixed, crash/leak harness

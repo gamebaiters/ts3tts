@@ -1178,6 +1178,10 @@ Chat: /tts &lt;testo&gt; parla, /tts stop ferma.</translation>
             <source>Show progress</source>
             <translation>Mostra avanzamento</translation>
         </message>
+        <message>
+            <source>Turn the voice engine on or off</source>
+            <translation>Accendi o spegni il motore vocale</translation>
+        </message>
     </context>
     <context>
         <name>gbtts::Updater</name>

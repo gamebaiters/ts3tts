@@ -5,6 +5,7 @@
 #include "dsp/PitchShiftGrain.h"
 #include "dsp/SandboxState.h"
 #include "dsp/SlotDsp.h"
+#include "ipc/GbAudioBridge.h"
 
 #include <atomic>
 #include <condition_variable>
@@ -201,6 +202,13 @@ private:
     std::vector<int16_t> m_pbStereo;
     std::vector<uint8_t> m_pbFlags;
     std::vector<uint8_t> m_fbFlags;
+
+    // ---- cross-plugin audio bridge (capture thread only) --------------------------
+    // See ipc/GbAudioBridge.h. Soundboard-and-TTS coexistence: published every
+    // capture callback when the Soundboard plugin is present, instead of this
+    // plugin writing the shared TS3 capture buffer itself.
+    GbBridge::Handle     m_bridge;
+    std::vector<int16_t> m_bridgePub;
 
     // ---- voice changer ------------------------------------------------------------
     // m_vcUp:   capture thread writes the user's mic, link thread reads it (frames 0x03).
