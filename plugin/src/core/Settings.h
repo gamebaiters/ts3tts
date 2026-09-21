@@ -24,6 +24,12 @@ struct Settings
     // turns it on (toolbar power button / "Start" action / Settings
     // checkbox), never silently on every TeamSpeak launch.
     bool    autostart       = false;
+    // One-time migration flag (v1.1.0): an upgrading install's saved
+    // `autostart` is indistinguishable from "the old hardcoded default
+    // was true and the user never touched it" - so the first load after
+    // this fix forces it off once (see Settings::load()), then leaves
+    // whatever the user does afterward alone. Never surfaced in the UI.
+    bool    autostartMigrated = false;
     QString engine          = QStringLiteral("qwen");   // qwen | kokoro | supertonic
     QString qwenSize        = QStringLiteral("1.7B");   // 1.7B | 0.6B
     QString kokoroVariant   = QStringLiteral("fp32");   // fp32 (fast on CPU) | int8 (smaller, ~7x slower)

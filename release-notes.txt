@@ -1,3 +1,18 @@
+GameBaiters TTS v1.1.1
+======================================================================
+
+Hotfix for a v1.1.0 regression: the engine could still start itself
+automatically even though "off by default" was the whole point of that
+release.
+
+* FIX - v1.1.0 changed the DEFAULT for new installs, but an existing
+  install already had "start with TeamSpeak" saved from before and kept
+  that value across the update - so the engine kept auto-starting for
+  anyone who had used the plugin previously. This release forces it off
+  once for every install that has not explicitly gone through this
+  fix yet; afterward, your own choice (on or off) is remembered as
+  usual.
+
 GameBaiters TTS v1.1.0
 ======================================================================
 

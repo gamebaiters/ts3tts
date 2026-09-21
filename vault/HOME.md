@@ -26,7 +26,8 @@ Obsidian-style vault. Open this folder in Obsidian: the graph view is the mind m
 - [[testing]] — bench (TTFA/RTF/VRAM + Whisper CER), backend e2e, audio-core + settings selftests, host lifecycle/leak/crash harness
 
 ## History
-- [[v1.1.0]] — ⭐ latest: engine off by default, power on/off button, DSP-tail ring-out no longer overholds for non-tail effects, cross-plugin audio bridge with the GameBaiters Soundboard.
+- [[v1.1.1]] — ⭐ latest: hotfix — existing installs kept auto-starting despite v1.1.0's "off by default" (persisted `autostart=true` predates the fix); one-time migration forces it off once per install, then respects the user's own choice.
+- [[v1.1.0]] — engine off by default, power on/off button, DSP-tail ring-out no longer overholds for non-tail effects, cross-plugin audio bridge with the GameBaiters Soundboard.
 - [[v1.0.0]] — first release: decisions, rejected alternatives, bugs found while building
 - [[v1.1.0]] — Kokoro light engine, Italian default
 - [[v1.2.0]] — engine chosen in Settings, per-engine voices, save on every change, singleShot-after-unload crash found and fixed, crash/leak harness

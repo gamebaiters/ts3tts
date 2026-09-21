@@ -23,7 +23,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-set(GBTTS_VERSION "1.1.0")   # release: also backend/gbtts/__init__.py + release-notes.txt (tools/release_check.ps1)
+set(GBTTS_VERSION "1.1.1")   # release: also backend/gbtts/__init__.py + release-notes.txt (tools/release_check.ps1)
 set(SOUNDBOARD_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../SOUNDBOARD_4.0" CACHE PATH
     "GameBaiters Soundboard workspace (the folder holding upstream-clone/)")
 get_filename_component(SOUNDBOARD_ROOT "${SOUNDBOARD_ROOT}" ABSOLUTE)

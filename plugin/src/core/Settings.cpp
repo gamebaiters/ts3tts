@@ -34,6 +34,7 @@ void Settings::load()
     s.beginGroup(QStringLiteral("backend"));
     backendHome     = s.value(QStringLiteral("home"), d.backendHome).toString();
     autostart       = s.value(QStringLiteral("autostart"), d.autostart).toBool();
+    autostartMigrated = s.value(QStringLiteral("autostart_migrated"), d.autostartMigrated).toBool();
     engine          = s.value(QStringLiteral("engine"), d.engine).toString();
     qwenSize        = s.value(QStringLiteral("qwen_size"), d.qwenSize).toString();
     kokoroVariant   = s.value(QStringLiteral("kokoro_variant"), d.kokoroVariant).toString();
@@ -121,6 +122,15 @@ void Settings::load()
     // Italian is the default interface language (v1.1): the old "auto" value is
     // migrated; only an explicit English choice keeps English.
     if (uiLanguage != QLatin1String("en")) uiLanguage = QStringLiteral("it");
+    // The engine must always be off by default (v1.1.0): a saved `true`
+    // from before this fix is indistinguishable from "the old hardcoded
+    // default was true and nobody touched it", so force it off exactly
+    // once. After this runs the marker is saved and the user's own
+    // choice (on or off) is respected from then on.
+    if (!autostartMigrated) {
+        autostart = false;
+        autostartMigrated = true;
+    }
     if (lang.isEmpty()) lang = d.lang;
     chunkSize = qBound(1, chunkSize, 12);
     temperature = qBound(0.3, temperature, 1.2);
@@ -141,6 +151,7 @@ bool Settings::save() const
     s.beginGroup(QStringLiteral("backend"));
     s.setValue(QStringLiteral("home"), backendHome);
     s.setValue(QStringLiteral("autostart"), autostart);
+    s.setValue(QStringLiteral("autostart_migrated"), autostartMigrated);
     s.setValue(QStringLiteral("engine"), engine);
     s.setValue(QStringLiteral("qwen_size"), qwenSize);
     s.setValue(QStringLiteral("kokoro_variant"), kokoroVariant);
